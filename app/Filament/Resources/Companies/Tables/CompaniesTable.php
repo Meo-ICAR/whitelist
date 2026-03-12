@@ -62,7 +62,7 @@ class CompaniesTable
                     ->modalContent(fn($record) => new HtmlString('
         <div class="flex flex-col items-center justify-center p-4">
             <div class="bg-white p-4 rounded-lg shadow-sm border">
-                ' . QrCode::size(250)->generate(route('report.form', ['company' => $record->slug])) . '
+                ' . QrCode::size(250)->generate(route('report.welcome', ['company' => $record->slug])) . '
             </div>
             <p class="mt-4 text-sm text-gray-500 text-center">
                 Inquadra questo codice per accedere al form di ' . $record->name . '
