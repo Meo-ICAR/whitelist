@@ -61,8 +61,8 @@ class CompanyForm
                             ->label('Codice Aziendale Condiviso')
                             ->helperText('I dipendenti dovranno inserire questo codice per sbloccare il form di segnalazione.')
                             ->maxLength(255)
-                            ->default(fn() => strtoupper(Str::random(8))),  // Genera un codice casuale di 8 lettere/numeri
-                        //   ->revealable(),  // Permette di nascondere/mostrare il testo
+                            ->default(fn() => strtoupper(Str::random(8)))  // Genera un codice casuale di 8 lettere/numeri
+                            ->revealable(),  // Permette di nascondere/mostrare il testo
                     ]),
             ]);
     }

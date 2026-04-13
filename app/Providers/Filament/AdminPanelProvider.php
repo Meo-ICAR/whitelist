@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Models\Company;
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -28,18 +30,11 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->tenant(Company::class, slugAttribute: 'slug')
+            ->tenantMenu(true)
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => fn() => Filament::getTenant()?->brand_color ?? '#1d4ed8',
             ])
-            //  ->tenant(Company::class, slugAttribute: 'slug')
-            // Forza l'utente a passare per la pagina di selezione se ha più aziende
-            // ->tenantMenu(true)
-            // Se vuoi permettere all'utente di creare una nuova azienda (opzionale)
-            // ->tenantRegistration(RegisterCompany::class)
-            //  ->tenantProfile(EditCompanyProfile::class); // Per modificare i dati dell'azienda
-            // ->colors([
-            //   'primary' => fn() => Filament::getTenant()?->brand_color ?? '#1d4ed8',
-            //  ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

@@ -8,7 +8,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -21,14 +21,35 @@ class PublicReportForm extends Component implements HasForms
     // Variabili per la schermata di successo
     public bool $isSubmitted = false;
     public string $trackingPin = '';
+    // Variabili per la verifica passcode
+    public bool $passcodeVerified = false;
+    public string $passcodeInput = '';
 
-    public function mount(Company $company)
+    public function mount(Company $company): void
     {
         $this->company = $company;
+        // Se non c'è passcode, il form è direttamente accessibile
+        if (empty($company->shared_passcode)) {
+            $this->passcodeVerified = true;
+        }
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function verifyPasscode(): void
+    {
+        if (empty($this->company->shared_passcode)) {
+            $this->passcodeVerified = true;
+            return;
+        }
+
+        if ($this->passcodeInput === $this->company->shared_passcode) {
+            $this->passcodeVerified = true;
+        } else {
+            $this->addError('passcodeInput', 'Codice non valido');
+        }
+    }
+
+    public function form(Schema $form): Schema
     {
         return $form
             ->schema([
@@ -78,7 +99,9 @@ class PublicReportForm extends Component implements HasForms
 
     public function render()
     {
-        return view('livewire.public-report-form')->layout('layouts.guest');
-        // Usa un layout minimale senza menu o header!
+        $showPasscodeStep = !empty($this->company->shared_passcode) && !$this->passcodeVerified;
+
+        return view('livewire.public-report-form', compact('showPasscodeStep'))
+            ->layout('layouts.guest', ['company' => $this->company]);
     }
 }

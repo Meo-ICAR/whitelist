@@ -4,8 +4,9 @@ namespace App\Filament\Resources\Reports\RelationManagers;
 
 use App\Filament\Resources\Reports\ReportResource;
 use Filament\Actions\CreateAction;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -14,6 +15,17 @@ class MessagesRelationManager extends RelationManager
     protected static string $relationship = 'messages';
 
     protected static ?string $relatedResource = ReportResource::class;
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema->components([
+            Textarea::make('body')
+                ->label('Messaggio')
+                ->required()
+                ->rows(4)
+                ->columnSpanFull(),
+        ]);
+    }
 
     public function table(Table $table): Table
     {

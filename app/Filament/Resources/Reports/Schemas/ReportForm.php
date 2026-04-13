@@ -44,7 +44,7 @@ class ReportForm
                         // Mostra gli eventuali allegati caricati dal segnalante
                         SpatieMediaLibraryFileUpload::make('attachments')
                             ->label('Prove / Allegati')
-                            ->collection('reports')  // Il nome della collection che hai usato nel form pubblico
+                            ->collection('evidence')  // Allineato con registerMediaCollections() nel modello Report
                             ->disabled()  // Non può aggiungere o togliere file da qui
                             ->downloadable()  // Ma può scaricarli per visionarli
                             ->columnSpanFull(),

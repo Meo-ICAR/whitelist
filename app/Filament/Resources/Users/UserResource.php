@@ -26,7 +26,7 @@ class UserResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Gestori';
 
-    //  protected static ?string $navigationGroup = 'Amministrazione SaaS';
+    protected static string|\UnitEnum|null $navigationGroup = 'Amministrazione SaaS';
 
     // Mettiamo questa risorsa sotto quella delle Aziende nel menu
     protected static ?int $navigationSort = 2;

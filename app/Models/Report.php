@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -38,5 +39,18 @@ class Report extends Model implements HasMedia
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
+    }
+
+    // Media Library: collection 'evidence' su disco privato per gli allegati
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('evidence')
+            ->useDisk('private');
+    }
+
+    // Scope: filtra le segnalazioni per azienda (tenant isolation)
+    public function scopeForCompany(Builder $query, Company $company): Builder
+    {
+        return $query->where('company_id', $company->id);
     }
 }

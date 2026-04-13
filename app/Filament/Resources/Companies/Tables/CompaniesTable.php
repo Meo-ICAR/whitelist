@@ -31,8 +31,10 @@ class CompaniesTable
                     ->label('Link Segnalazioni')
                     ->icon('heroicon-o-link')
                     ->color('info')
-                    ->copyable()  // Cliccando copia lo slug negli appunti
-                    ->copyMessage('Slug copiato!')
+                    ->formatStateUsing(fn(string $state): string => route('report.welcome', ['company' => $state]))
+                    ->copyable()
+                    ->copyStateUsing(fn($record): string => route('report.welcome', ['company' => $record->slug]))
+                    ->copyMessage('Link copiato!')
                     ->searchable(),
                 ColorColumn::make('brand_color')
                     ->label('Colore')

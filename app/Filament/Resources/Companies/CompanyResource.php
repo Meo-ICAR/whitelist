@@ -13,6 +13,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use BackedEnum;
+use UnitEnum;
 
 class CompanyResource extends Resource
 {
@@ -26,7 +27,7 @@ class CompanyResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Aziende';
 
-    // protected static ?string $navigationGroup = 'Amministrazione SaaS';
+    protected static string|UnitEnum|null $navigationGroup = 'Amministrazione SaaS';
 
     public static function form(Schema $schema): Schema
     {
