@@ -6,13 +6,11 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class CompanyForm
 {
@@ -56,13 +54,22 @@ class CompanyForm
                             ->label('Colore Principale (Brand Color)')
                             ->default('#1d4ed8'),
                     ]),
+                Section::make('Webmaster')
+                    ->description("Email del referente tecnico che gestisce il sito aziendale, a cui inviare link, codice d'accesso, QR code e snippet HTML da pubblicare.")
+                    ->schema([
+                        TextInput::make('webmaster_email')
+                            ->label('Email Webmaster')
+                            ->email()
+                            ->maxLength(255)
+                            ->helperText("Necessaria per usare l'azione \"Invia info al Webmaster\" nell'elenco aziende."),
+                    ]),
                 Section::make('Sicurezza e Accesso')
                     ->schema([
                         TextInput::make('shared_passcode')
                             ->label('Codice Aziendale Condiviso')
                             ->helperText('I dipendenti dovranno inserire questo codice per sbloccare il form di segnalazione. Ruota periodicamente il codice se sospetti che sia trapelato.')
                             ->maxLength(255)
-                            ->default(fn() => strtoupper(Str::random(8)))  // Genera un codice casuale di 8 lettere/numeri
+                            ->default(fn () => strtoupper(Str::random(8)))  // Genera un codice casuale di 8 lettere/numeri
                             // Bugfix: revealable() richiede che il campo sia password(),
                             // altrimenti Filament lancia un errore fatale in ogni pagina
                             // che mostra questo form (nessun test lo copriva finora).
@@ -78,10 +85,10 @@ class CompanyForm
                                         $set('shared_passcode', strtoupper(Str::random(8)));
                                     })
                             ),
-                        Text::make(fn($record) => $record?->passcode_rotated_at
-                            ? 'Ultima rotazione: ' . $record->passcode_rotated_at->format('d/m/Y H:i')
+                        Text::make(fn ($record) => $record?->passcode_rotated_at
+                            ? 'Ultima rotazione: '.$record->passcode_rotated_at->format('d/m/Y H:i')
                             : 'Codice mai ruotato dopo la creazione.')
-                            ->visible(fn($record) => filled($record))
+                            ->visible(fn ($record) => filled($record))
                             ->color('gray'),
                     ]),
             ]);

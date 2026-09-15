@@ -9,12 +9,12 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
-use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Widgets\AccountWidget;
+use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -57,6 +57,23 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
+            ])
+            ->navigationItems([
+                NavigationItem::make('Manuale Operativo Tecnico')
+                    ->icon('heroicon-o-document-text')
+                    ->group('Documentazione')
+                    ->sort(1)
+                    ->url(fn (): string => route('docs.manuale-tecnico'), shouldOpenInNewTab: true),
+                NavigationItem::make('Manuale Utente (PDF)')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->group('Documentazione')
+                    ->sort(2)
+                    ->url(fn (): string => route('docs.manuale-utente'), shouldOpenInNewTab: true),
+                NavigationItem::make('Manuale Webmaster')
+                    ->icon('heroicon-o-globe-alt')
+                    ->group('Documentazione')
+                    ->sort(3)
+                    ->url(fn (): string => route('docs.manuale-webmaster'), shouldOpenInNewTab: true),
             ])
             ->middleware([
                 EncryptCookies::class,

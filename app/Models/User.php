@@ -13,6 +13,7 @@ use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -56,6 +57,11 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         ];
     }
 
+    public function company(): BelongsToMany
+    {
+        return $this->belongsToMany(Company::class);
+    }
+
     public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class);
@@ -71,7 +77,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->companies()->exists();
     }
 
-    public function canAccessTenant(\Illuminate\Database\Eloquent\Model $tenant): bool
+    public function canAccessTenant(Model $tenant): bool
     {
         return $this->companies()->where('companies.id', $tenant->id)->exists();
     }

@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ isset($company) ? $company->name . ' — Whistleblowing' : config('app.name') }}</title>
 
-    {{-- Filament's compiled CSS includes Tailwind --}}
-    <link rel="stylesheet" href="{{ asset('css/filament/filament/app.css') }}">
-
-    {{-- Solo JS: registratore vocale con alteratore del timbro (voice-recorder.js) --}}
-    @vite(['resources/js/app.js'])
+    {{-- Tailwind (build applicativo) + JS: registratore vocale con alteratore del timbro (voice-recorder.js) --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @if(isset($company) && $company->brand_color)
     <style>
@@ -69,6 +66,9 @@
                 @endif
                 <span class="text-gray-300">|</span>
                 <span class="text-sm text-gray-500">Portale Whistleblowing</span>
+                <a href="{{ route('report.guide', $company->slug) }}" class="ml-auto text-sm font-medium text-brand hover:underline">
+                    Come funziona?
+                </a>
             @else
                 <span class="text-xl font-bold text-gray-800">Whistleblowing</span>
             @endif

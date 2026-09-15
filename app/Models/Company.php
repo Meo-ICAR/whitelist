@@ -1,15 +1,18 @@
 <?php
+
 namespace App\Models;
 
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Writer\PngWriter;
 use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Company extends Model implements HasAvatar
 {
@@ -22,6 +25,7 @@ class Company extends Model implements HasAvatar
         'brand_color',
         'shared_passcode',
         'passcode_rotated_at',
+        'webmaster_email',
     ];
 
     protected function casts(): array
@@ -56,7 +60,7 @@ class Company extends Model implements HasAvatar
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'slug', 'brand_color', 'passcode_rotated_at'])
+            ->logOnly(['name', 'slug', 'brand_color', 'passcode_rotated_at', 'webmaster_email'])
             ->logOnlyDirty()
             ->dontLogEmptyChanges();
     }
@@ -85,5 +89,20 @@ class Company extends Model implements HasAvatar
         return $this->logo_path
             ? Storage::url($this->logo_path)
             : null;
+    }
+
+    // Immagine PNG del QR code che punta al link pubblico di segnalazione di
+    // questa azienda. Usata sia dalla rotta di download pubblico (route
+    // 'report.qrcode') sia dall'email inviata al webmaster, per non
+    // duplicare la configurazione del generatore in due posti.
+    public function qrCodePng(): string
+    {
+        return Builder::create()
+            ->writer(new PngWriter)
+            ->data(route('report.welcome', ['company' => $this->slug]))
+            ->size(600)
+            ->margin(16)
+            ->build()
+            ->getString();
     }
 }
