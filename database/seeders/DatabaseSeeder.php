@@ -20,9 +20,40 @@ class DatabaseSeeder extends Seeder
         $this->call(CorrectiveMeasureTemplateSeeder::class);
 
         // Azienda di esempio
+        $company0 = Company::create([
+            'name' => 'RACES Finance',
+            'slug' => 'races',
+            'brand_color' => '#1d4ed8',
+            'shared_passcode' => 'DEMO2024',
+        ]);
+
+        // Utente gestore
+        $user0 = User::create([
+            'name' => 'Admin RACES',
+            'email' => 'sergio.bracale@races.it',
+            'password' => Hash::make('password'),
+        ]);
+
+        $user1 = User::create([
+            'name' => 'Mario',
+            'email' => 'mario.gargiulo@races.it',
+            'password' => Hash::make('password'),
+        ]);
+
+        $company0->users()->attach($user0->id);
+        $company0->users()->attach($user1->id);
+
+        // Utente gestore
+        $user = User::create([
+            'name' => 'Admin Gestore',
+            'email' => 'hassistosrl@gmail.com',
+            'password' => Hash::make('password'),
+        ]);
+
+        // Azienda di esempio
         $company = Company::create([
-            'name' => 'Acme Corp',
-            'slug' => 'acme-corp',
+            'name' => 'Hassisto',
+            'slug' => 'hassisto',
             'brand_color' => '#1d4ed8',
             'shared_passcode' => 'DEMO2024',
         ]);
@@ -30,7 +61,7 @@ class DatabaseSeeder extends Seeder
         // Utente gestore
         $user = User::create([
             'name' => 'Admin Gestore',
-            'email' => 'admin@acme.test',
+            'email' => 'hassistosrl@gmail.com',
             'password' => Hash::make('password'),
         ]);
 
