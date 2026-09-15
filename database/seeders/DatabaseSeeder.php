@@ -43,13 +43,6 @@ class DatabaseSeeder extends Seeder
         $company0->users()->attach($user0->id);
         $company0->users()->attach($user1->id);
 
-        // Utente gestore
-        $user = User::create([
-            'name' => 'Admin Gestore',
-            'email' => 'hassistosrl@gmail.com',
-            'password' => Hash::make('password'),
-        ]);
-
         // Azienda di esempio
         $company = Company::create([
             'name' => 'Hassisto',
