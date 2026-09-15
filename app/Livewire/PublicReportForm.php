@@ -9,6 +9,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -42,9 +43,20 @@ class PublicReportForm extends Component implements HasForms
             return;
         }
 
-        if ($this->passcodeInput === $this->company->shared_passcode) {
+        $throttleKey = 'passcode-verify:' . $this->company->id . ':' . request()->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 10)) {
+            $this->addError('passcodeInput', 'Troppi tentativi. Riprova tra ' . RateLimiter::availableIn($throttleKey) . ' secondi.');
+
+            return;
+        }
+
+        // hash_equals evita timing attack rispetto al confronto diretto con '==='
+        if (hash_equals((string) $this->company->shared_passcode, $this->passcodeInput)) {
+            RateLimiter::clear($throttleKey);
             $this->passcodeVerified = true;
         } else {
+            RateLimiter::hit($throttleKey, 60);
             $this->addError('passcodeInput', 'Codice non valido');
         }
     }
@@ -77,10 +89,23 @@ class PublicReportForm extends Component implements HasForms
 
     public function submit()
     {
+        $throttleKey = 'report-submit:' . $this->company->id . ':' . request()->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $this->addError('data.title', 'Troppi invii. Riprova tra ' . RateLimiter::availableIn($throttleKey) . ' secondi.');
+
+            return;
+        }
+
+        RateLimiter::hit($throttleKey, 300);
+
         $data = $this->form->getState();
 
-        // Genera un PIN univoco e facile da leggere (es. WHSL-A8F2-9K1M)
-        $this->trackingPin = 'WHSL-' . strtoupper(Str::random(4) . '-' . Str::random(4));
+        // Genera un PIN univoco e facile da leggere (es. WHSL-A8F2-9K1M),
+        // ricontrollando l'unicità nel DB prima di salvare
+        do {
+            $this->trackingPin = 'WHSL-' . strtoupper(Str::random(4) . '-' . Str::random(4));
+        } while (Report::where('tracking_token', $this->trackingPin)->exists());
 
         // Salva nel database associando all'azienda
         $report = $this->company->reports()->create([

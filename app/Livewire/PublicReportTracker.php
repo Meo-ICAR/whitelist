@@ -3,6 +3,7 @@ namespace App\Livewire;
 
 use App\Models\Company;
 use App\Models\Report;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 class PublicReportTracker extends Component
@@ -23,10 +24,24 @@ class PublicReportTracker extends Component
     {
         $this->errorMessage = '';
 
-        // Cerca la segnalazione tramite il tracking token univoco
-        $report = Report::where('tracking_token', $this->pin)->first();
+        $throttleKey = 'report-tracker:' . $this->company->id . ':' . request()->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 10)) {
+            $this->errorMessage = 'Troppi tentativi. Riprova tra ' . RateLimiter::availableIn($throttleKey) . ' secondi.';
+
+            return;
+        }
+
+        RateLimiter::hit($throttleKey, 60);
+
+        // Cerca la segnalazione tramite il tracking token univoco,
+        // scoperta solo tra quelle della company corrente (isolamento tenant)
+        $report = Report::forCompany($this->company)
+            ->where('tracking_token', $this->pin)
+            ->first();
 
         if ($report) {
+            RateLimiter::clear($throttleKey);
             $this->report = $report;
         } else {
             $this->errorMessage = 'PIN non valido o segnalazione inesistente.';
