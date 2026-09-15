@@ -8,6 +8,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -59,10 +60,29 @@ class CompanyForm
                     ->schema([
                         TextInput::make('shared_passcode')
                             ->label('Codice Aziendale Condiviso')
-                            ->helperText('I dipendenti dovranno inserire questo codice per sbloccare il form di segnalazione.')
+                            ->helperText('I dipendenti dovranno inserire questo codice per sbloccare il form di segnalazione. Ruota periodicamente il codice se sospetti che sia trapelato.')
                             ->maxLength(255)
                             ->default(fn() => strtoupper(Str::random(8)))  // Genera un codice casuale di 8 lettere/numeri
-                            ->revealable(),  // Permette di nascondere/mostrare il testo
+                            // Bugfix: revealable() richiede che il campo sia password(),
+                            // altrimenti Filament lancia un errore fatale in ogni pagina
+                            // che mostra questo form (nessun test lo copriva finora).
+                            ->password()
+                            ->revealable()  // Permette di nascondere/mostrare il testo
+                            ->suffixAction(
+                                Action::make('regeneratePasscode')
+                                    ->label('Rigenera')
+                                    ->icon('heroicon-o-arrow-path')
+                                    ->requiresConfirmation()
+                                    ->modalDescription('Il vecchio codice smetterà immediatamente di funzionare. Dovrai comunicare il nuovo codice ai dipendenti.')
+                                    ->action(function (Set $set) {
+                                        $set('shared_passcode', strtoupper(Str::random(8)));
+                                    })
+                            ),
+                        Text::make(fn($record) => $record?->passcode_rotated_at
+                            ? 'Ultima rotazione: ' . $record->passcode_rotated_at->format('d/m/Y H:i')
+                            : 'Codice mai ruotato dopo la creazione.')
+                            ->visible(fn($record) => filled($record))
+                            ->color('gray'),
                     ]),
             ]);
     }

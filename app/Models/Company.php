@@ -2,15 +2,18 @@
 namespace App\Models;
 
 use Filament\Models\Contracts\HasAvatar;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Activitylog\Support\LogOptions;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 class Company extends Model implements HasAvatar
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'name',
@@ -18,7 +21,45 @@ class Company extends Model implements HasAvatar
         'logo_path',
         'brand_color',
         'shared_passcode',
+        'passcode_rotated_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'passcode_rotated_at' => 'datetime',
+        ];
+    }
+
+    // Ogni volta che il codice condiviso cambia, registriamo SOLO il momento
+    // della rotazione: il valore del codice non deve mai comparire nei log
+    // applicativi o nell'audit trail.
+    protected function sharedPasscode(): Attribute
+    {
+        return Attribute::make(
+            // Un mutatore "set" può restituire un array per aggiornare più
+            // attributi in una volta sola: qui aggiorniamo anche
+            // passcode_rotated_at quando il codice cambia davvero.
+            set: function (?string $value) {
+                $hasChanged = ($this->attributes['shared_passcode'] ?? null) !== $value;
+
+                return [
+                    'shared_passcode' => $value,
+                    'passcode_rotated_at' => $hasChanged ? now() : ($this->attributes['passcode_rotated_at'] ?? null),
+                ];
+            },
+        );
+    }
+
+    // Audit trail: mai il valore del passcode, solo i campi non sensibili
+    // e la data dell'ultima rotazione del codice.
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'slug', 'brand_color', 'passcode_rotated_at'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     // Relazione: Un'azienda ha molti Gestori (Utenti del pannello)
     public function users(): BelongsToMany

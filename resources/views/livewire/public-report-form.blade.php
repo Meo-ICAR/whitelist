@@ -115,6 +115,44 @@
                     </p>
                 </div>
 
+                {{-- Registrazione vocale con alteratore del timbro: registra in
+                     browser, altera il tono (per non essere riconoscibile dalla
+                     voce) e allega il file audio risultante come una prova. --}}
+                <div
+                    x-data="voiceRecorder()"
+                    class="mb-6 border border-gray-200 rounded-xl p-4"
+                >
+                    <p class="text-sm font-semibold text-gray-700 mb-1">Registrazione vocale (facoltativa)</p>
+                    <p class="text-xs text-gray-500 mb-3">
+                        Puoi registrare un messaggio vocale invece di scriverlo. Il timbro della tua voce viene alterato automaticamente prima dell'invio, per proteggere il tuo anonimato.
+                    </p>
+
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <button
+                            type="button"
+                            x-show="!isRecording"
+                            x-on:click="startRecording()"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition cursor-pointer"
+                        >
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                            Avvia registrazione
+                        </button>
+                        <button
+                            type="button"
+                            x-show="isRecording"
+                            x-on:click="stopRecording()"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-gray-800 text-white hover:bg-gray-900 transition cursor-pointer"
+                        >
+                            <span class="w-2.5 h-2.5 rounded-sm bg-white"></span>
+                            <span x-text="'Ferma (' + elapsed + 's)'"></span>
+                        </button>
+
+                        <span x-show="status" x-text="status" class="text-xs text-gray-500"></span>
+                    </div>
+
+                    <audio x-show="previewUrl" x-bind:src="previewUrl" controls class="mt-3 w-full"></audio>
+                </div>
+
                 <form wire:submit.prevent="submit" class="space-y-6">
                     {{ $this->form }}
 

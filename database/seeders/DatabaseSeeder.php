@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        // Modelli globali di misure correttive, richiamabili da ogni azienda.
+        $this->call(CorrectiveMeasureTemplateSeeder::class);
+
         // Azienda di esempio
         $company = Company::create([
             'name' => 'Acme Corp',

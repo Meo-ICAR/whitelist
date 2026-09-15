@@ -3,15 +3,20 @@ namespace App\Livewire;
 
 use App\Models\Company;
 use App\Models\Report;
+use App\Notifications\NewReportReceived;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class PublicReportForm extends Component implements HasForms
 {
@@ -81,8 +86,35 @@ class PublicReportForm extends Component implements HasForms
                     ->multiple()
                     ->maxFiles(5)
                     ->maxSize(10240)  // 10MB
-                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png', 'audio/mpeg'])
-                    ->disk('private'),  // Fondamentale: usa un disco NON pubblico
+                    // audio/wav: formato prodotto dal registratore vocale in
+                    // browser dopo l'alterazione del timbro (vedi voice-recorder.js).
+                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png', 'audio/mpeg', 'audio/wav'])
+                    ->disk('private')  // Fondamentale: usa un disco NON pubblico
+                    // Cifratura a riposo: il contenuto reale del file non è mai
+                    // leggibile direttamente dal disco, nemmeno da chi ha
+                    // accesso al filesystem del server. Il mime/nome originali
+                    // sono salvati solo come custom properties del record Media
+                    // (nel DB, non nel file), per poterli ricostruire in fase
+                    // di download decifrato (vedi routes/web.php).
+                    ->saveUploadedFileUsing(function (SpatieMediaLibraryFileUpload $component, TemporaryUploadedFile $file, ?Model $record) {
+                        if (! $file->exists()) {
+                            return null;
+                        }
+
+                        $encrypted = Crypt::encryptString($file->get());
+
+                        $media = $record->addMediaFromString($encrypted)
+                            ->usingFileName($component->getUploadedFileNameForStorage($file) . '.enc')
+                            ->usingName(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
+                            ->withCustomProperties([
+                                'encrypted' => true,
+                                'original_name' => $file->getClientOriginalName(),
+                                'original_mime' => $file->getMimeType(),
+                            ])
+                            ->toMediaCollection($component->getCollection() ?? 'default', $component->getDiskName());
+
+                        return $media->getAttributeValue('uuid');
+                    }),
             ])
             ->statePath('data');
     }
@@ -117,6 +149,10 @@ class PublicReportForm extends Component implements HasForms
 
         // Associa i file caricati al modello Report (Spatie Media Library)
         $this->form->model($report)->saveRelationships();
+
+        // Avvisa i gestori dell'azienda: l'email non contiene mai il
+        // contenuto della segnalazione, solo l'invito ad accedere al pannello.
+        Notification::send($this->company->users, new NewReportReceived($report));
 
         // Mostra la schermata di successo
         $this->isSubmitted = true;

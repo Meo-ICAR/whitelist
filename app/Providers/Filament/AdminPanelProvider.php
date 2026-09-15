@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Models\Company;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -30,10 +31,22 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // Sicurezza: i gestori accedono a dati di segnalanti anonimi molto
+            // sensibili, quindi la 2FA tramite app authenticator (TOTP) è
+            // obbligatoria per ogni account al primo accesso utile.
+            // In locale con APP_DEBUG=true resta disponibile ma non
+            // obbligatoria, per non intralciare lo sviluppo/i test manuali.
+            ->multiFactorAuthentication([
+                AppAuthentication::make()->recoverable(),
+            ], isRequired: fn () => ! config('app.debug'))
             ->tenant(Company::class, slugAttribute: 'slug')
             ->tenantMenu(true)
-            ->colors([
-                'primary' => fn() => Filament::getTenant()?->brand_color ?? '#1d4ed8',
+            // Bugfix: la closure va sull'intero array restituito da colors(),
+            // non su un singolo valore al suo interno, altrimenti Filament
+            // tenta un array_map() su una Closure e va in errore fatale su
+            // OGNI pagina del pannello.
+            ->colors(fn () => [
+                'primary' => Filament::getTenant()?->brand_color ?? '#1d4ed8',
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

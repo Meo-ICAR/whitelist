@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Reports\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use App\Enums\ReportStatus;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
@@ -27,19 +27,26 @@ class ReportsTable
                     ->limit(50),
                 TextColumn::make('status')
                     ->label('Stato')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'new' => 'danger',  // Rosso per le nuove (richiedono attenzione)
-                        'in_progress' => 'warning',  // Giallo per quelle in lavorazione
-                        'closed' => 'success',  // Verde per quelle chiuse
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'new' => 'Nuova',
-                        'in_progress' => 'In Lavorazione',
-                        'closed' => 'Chiusa',
-                        default => $state,
-                    }),
+                    ->badge(),
+                IconColumn::make('acknowledgement_overdue')
+                    ->label('Avviso scaduto')
+                    ->boolean()
+                    ->getStateUsing(fn ($record) => is_null($record->acknowledged_at) && $record->acknowledgement_due_at?->isPast())
+                    ->trueIcon('heroicon-o-exclamation-triangle')
+                    ->trueColor('danger')
+                    ->falseIcon('heroicon-o-check')
+                    ->falseColor('gray'),
+                IconColumn::make('feedback_overdue')
+                    ->label('Riscontro scaduto')
+                    ->boolean()
+                    ->getStateUsing(fn ($record) => $record->status !== ReportStatus::Closed && $record->feedback_due_at?->isPast())
+                    ->trueIcon('heroicon-o-exclamation-triangle')
+                    ->trueColor('danger')
+                    ->falseIcon('heroicon-o-check')
+                    ->falseColor('gray'),
+                IconColumn::make('meeting_requested_at')
+                    ->label('Incontro richiesto')
+                    ->boolean(),
                 TextColumn::make('created_at')
                     ->label('Ricevuta il')
                     ->dateTime('d/m/Y H:i')
@@ -48,11 +55,13 @@ class ReportsTable
             ->filters([
                 SelectFilter::make('status')
                     ->label('Filtra per Stato')
-                    ->options([
-                        'new' => 'Nuove',
-                        'in_progress' => 'In Lavorazione',
-                        'closed' => 'Chiuse',
-                    ]),
+                    ->options(ReportStatus::class),
+                Filter::make('deadlines_overdue')
+                    ->label('Scadenze superate')
+                    ->query(fn ($query) => $query->where(function ($query) {
+                        $query->acknowledgementDeadlineWithin(0)
+                            ->orWhere(fn ($query) => $query->feedbackDeadlineWithin(0));
+                    })),
             ])
             ->actions([
                 EditAction::make()

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Livewire\PublicReportForm;
 use App\Livewire\PublicReportTracker;
 use App\Models\Company;
+use App\Enums\ReportStatus;
 use App\Models\Report;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -54,7 +55,7 @@ class ReportSubmissionFlowTest extends TestCase
 
         $report = Report::first();
         $this->assertEquals('Irregolarità contabili', $report->title);
-        $this->assertEquals('new', $report->status);
+        $this->assertEquals(ReportStatus::New, $report->status);
         $this->assertEquals($this->company->id, $report->company_id);
     }
 
@@ -131,7 +132,7 @@ class ReportSubmissionFlowTest extends TestCase
         // 2. Verify report in DB
         $report = Report::where('tracking_token', $pin)->first();
         $this->assertNotNull($report);
-        $this->assertEquals('new', $report->status);
+        $this->assertEquals(ReportStatus::New, $report->status);
 
         // 3. Track report
         $trackerComponent = Livewire::test(PublicReportTracker::class, ['company' => $this->company])

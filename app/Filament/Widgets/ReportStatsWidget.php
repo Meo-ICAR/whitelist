@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\ReportStatus;
 use App\Models\Report;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
@@ -19,20 +20,20 @@ class ReportStatsWidget extends BaseWidget
             $query->where('company_id', $tenant->id);
         }
 
-        $new        = (clone $query)->where('status', 'new')->count();
-        $inProgress = (clone $query)->where('status', 'in_progress')->count();
-        $closed     = (clone $query)->where('status', 'closed')->count();
+        $counts = $query->selectRaw('status, count(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
 
         return [
-            Stat::make('Nuove', $new)
+            Stat::make('Nuove', $counts[ReportStatus::New->value] ?? 0)
                 ->description('Segnalazioni in attesa')
                 ->color('danger'),
 
-            Stat::make('In Lavorazione', $inProgress)
+            Stat::make('In Lavorazione', $counts[ReportStatus::InProgress->value] ?? 0)
                 ->description('Segnalazioni in corso')
                 ->color('warning'),
 
-            Stat::make('Chiuse', $closed)
+            Stat::make('Chiuse', $counts[ReportStatus::Closed->value] ?? 0)
                 ->description('Segnalazioni risolte')
                 ->color('success'),
         ];

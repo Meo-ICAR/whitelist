@@ -81,15 +81,14 @@
                         </div>
                         <div class="flex-shrink-0">
                             @php
-                                $statusConfig = match($report->status) {
-                                    'new'         => ['label' => 'Nuova',        'classes' => 'bg-blue-100 text-blue-700'],
-                                    'in_progress' => ['label' => 'In lavorazione','classes' => 'bg-amber-100 text-amber-700'],
-                                    'closed'      => ['label' => 'Chiusa',       'classes' => 'bg-gray-100 text-gray-600'],
-                                    default       => ['label' => ucfirst($report->status), 'classes' => 'bg-gray-100 text-gray-600'],
+                                $statusClasses = match($report->status) {
+                                    \App\Enums\ReportStatus::New        => 'bg-blue-100 text-blue-700',
+                                    \App\Enums\ReportStatus::InProgress => 'bg-amber-100 text-amber-700',
+                                    \App\Enums\ReportStatus::Closed     => 'bg-gray-100 text-gray-600',
                                 };
                             @endphp
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $statusConfig['classes'] }}">
-                                {{ $statusConfig['label'] }}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $statusClasses }}">
+                                {{ $report->status->getLabel() }}
                             </span>
                         </div>
                     </div>
@@ -102,6 +101,24 @@
                     <p class="text-xs text-gray-400 mt-4">
                         Inviata il {{ $report->created_at->format('d/m/Y \a\l\l\e H:i') }}
                     </p>
+
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        @if ($report->meeting_requested_at)
+                            <p class="text-xs text-gray-500">
+                                Hai richiesto un incontro diretto il {{ $report->meeting_requested_at->format('d/m/Y H:i') }}. Il gestore ti risponderà in chat.
+                            </p>
+                        @else
+                            <button
+                                type="button"
+                                wire:click="requestMeeting"
+                                wire:loading.attr="disabled"
+                                wire:confirm="Confermi di voler richiedere un incontro diretto con il gestore della segnalazione?"
+                                class="text-sm font-semibold underline text-gray-600 hover:text-gray-900 cursor-pointer disabled:opacity-60"
+                            >
+                                Richiedi un incontro diretto col gestore
+                            </button>
+                        @endif
+                    </div>
                 </div>
             </div>
 
@@ -140,7 +157,7 @@
                 </div>
 
                 {{-- Form invio messaggio (solo se non chiusa) --}}
-                @if ($report->status !== 'closed')
+                @if ($report->status !== \App\Enums\ReportStatus::Closed)
                     <div class="px-6 pb-6 pt-2 border-t border-gray-100">
                         <div class="flex gap-3">
                             <textarea

@@ -8,6 +8,9 @@
     {{-- Filament's compiled CSS includes Tailwind --}}
     <link rel="stylesheet" href="{{ asset('css/filament/filament/app.css') }}">
 
+    {{-- Solo JS: registratore vocale con alteratore del timbro (voice-recorder.js) --}}
+    @vite(['resources/js/app.js'])
+
     @if(isset($company) && $company->brand_color)
     <style>
         :root {

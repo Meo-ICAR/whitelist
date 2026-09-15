@@ -3,6 +3,8 @@ namespace App\Livewire;
 
 use App\Models\Company;
 use App\Models\Report;
+use App\Notifications\MeetingRequested;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
@@ -64,6 +66,19 @@ class PublicReportTracker extends Component
 
         // Opzionale: Ricarica la relazione per aggiornare la vista
         $this->report->load('messages');
+    }
+
+    // 3. Richiesta di incontro diretto col gestore della pratica
+    public function requestMeeting(): void
+    {
+        if ($this->report->meeting_requested_at) {
+            return;
+        }
+
+        $this->report->requestMeeting();
+        $this->report->load('messages');
+
+        Notification::send($this->company->users, new MeetingRequested($this->report));
     }
 
     public function render()
