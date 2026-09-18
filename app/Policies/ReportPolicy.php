@@ -12,15 +12,24 @@ class ReportPolicy
      * Filament, verifichiamo esplicitamente che l'utente appartenga alla
      * company della segnalazione, per non dipendere solo dal comportamento
      * implicito del panel builder.
+     *
+     * Il superadmin SaaS è escluso a priori, indipendentemente dalle
+     * aziende a cui risulta assegnato: gestisce aziende e gestori, ma non
+     * deve mai poter leggere il contenuto delle segnalazioni di nessuna
+     * azienda (nemmeno la propria, se ne gestisce una anche come gestore).
      */
     private function belongsToReportCompany(User $user, Report $report): bool
     {
+        if ($user->is_superadmin) {
+            return false;
+        }
+
         return $user->companies()->where('companies.id', $report->company_id)->exists();
     }
 
     public function viewAny(User $user): bool
     {
-        return $user->companies()->exists();
+        return (! $user->is_superadmin) && $user->companies()->exists();
     }
 
     public function view(User $user, Report $report): bool

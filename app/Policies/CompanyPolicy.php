@@ -14,32 +14,32 @@ class CompanyPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->companies()->exists();
+        return $user->is_superadmin || $user->companies()->exists();
     }
 
     public function view(User $user, Company $company): bool
     {
-        return $this->managesCompany($user, $company);
+        return $user->is_superadmin || $this->managesCompany($user, $company);
     }
 
     public function create(User $user): bool
     {
-        // Non esiste un ruolo "super-admin SaaS" distinto: senza questa
-        // restrizione, qualunque gestore aziendale potrebbe creare nuove
-        // aziende (tenant) dal proprio pannello. La creazione dei tenant è
-        // riservata a operazioni fuori dal pannello (seeder/console/support).
-        return false;
+        // Un superadmin SaaS è l'unico ruolo abilitato a creare nuove
+        // aziende (tenant): senza questa restrizione, qualunque gestore
+        // aziendale potrebbe creare nuovi tenant dal proprio pannello.
+        return $user->is_superadmin;
     }
 
     public function update(User $user, Company $company): bool
     {
-        return $this->managesCompany($user, $company);
+        return $user->is_superadmin || $this->managesCompany($user, $company);
     }
 
     public function delete(User $user, Company $company): bool
     {
         // Eliminare un'azienda cancella a cascata le sue segnalazioni:
-        // operazione riservata al supporto, mai a un gestore da pannello.
+        // operazione riservata al supporto, mai al pannello (nemmeno al
+        // superadmin).
         return false;
     }
 

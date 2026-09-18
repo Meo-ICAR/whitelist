@@ -7,14 +7,22 @@ use App\Models\User;
 
 class MessagePolicy
 {
+    // Il superadmin SaaS non deve mai poter leggere i messaggi di nessuna
+    // segnalazione (vedi ReportPolicy): già bloccato indirettamente perché
+    // non può aprire nessun Report, ma lo escludiamo esplicitamente qui
+    // come difesa in profondità.
     private function belongsToMessageCompany(User $user, Message $message): bool
     {
+        if ($user->is_superadmin) {
+            return false;
+        }
+
         return $user->companies()->where('companies.id', $message->report->company_id)->exists();
     }
 
     public function viewAny(User $user): bool
     {
-        return $user->companies()->exists();
+        return (! $user->is_superadmin) && $user->companies()->exists();
     }
 
     public function view(User $user, Message $message): bool
@@ -24,7 +32,7 @@ class MessagePolicy
 
     public function create(User $user): bool
     {
-        return $user->companies()->exists();
+        return (! $user->is_superadmin) && $user->companies()->exists();
     }
 
     public function update(User $user, Message $message): bool

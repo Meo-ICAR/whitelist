@@ -83,6 +83,16 @@ class CompanyWebmasterInfoTest extends TestCase
     }
 
     /** @test */
+    public function the_webmaster_email_is_sent_in_cc_to_the_onboarding_team(): void
+    {
+        $company = Company::create(['name' => 'Acme', 'slug' => 'acme', 'webmaster_email' => 'webmaster@acme.test']);
+
+        $mailMessage = (new WebmasterInfo($company))->toMail((object) ['routes' => ['mail' => $company->webmaster_email]]);
+
+        $this->assertContains(['info@unicocompilance.eu', null], $mailMessage->cc);
+    }
+
+    /** @test */
     public function qr_code_png_encodes_the_companys_public_report_link(): void
     {
         $company = Company::create(['name' => 'Acme', 'slug' => 'acme']);

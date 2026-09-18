@@ -32,6 +32,19 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         'name',
         'email',
         'password',
+        'is_superadmin',
+    ];
+
+    /**
+     * Bugfix: Model::create() con attributi non specificati esplicitamente
+     * (es. is_superadmin) lascia l'attributo assente sull'istanza in memoria
+     * anche se la colonna ha un default lato DB, causando un TypeError nelle
+     * Policy che dichiarano un tipo di ritorno bool non nullable.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'is_superadmin' => false,
     ];
 
     /**
@@ -54,6 +67,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_superadmin' => 'boolean',
         ];
     }
 
@@ -74,7 +88,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->companies()->exists();
+        // Un superadmin gestisce aziende e gestori senza dover essere
+        // necessariamente assegnato a nessuna azienda in particolare.
+        return $this->is_superadmin || $this->companies()->exists();
     }
 
     public function canAccessTenant(Model $tenant): bool

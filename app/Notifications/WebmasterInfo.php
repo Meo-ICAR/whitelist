@@ -28,6 +28,9 @@ class WebmasterInfo extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject("Canale di segnalazione {$this->company->name}: link, QR code e codice da pubblicare sul sito")
+            // In copia al team che segue l'onboarding dei clienti, per avere
+            // visibilità su quando le info sono state effettivamente inviate.
+            ->cc('info@unicocompilance.eu')
             ->view('mail.webmaster-info', ['company' => $this->company])
             ->attachData(
                 $this->company->qrCodePng(),

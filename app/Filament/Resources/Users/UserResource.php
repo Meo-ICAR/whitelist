@@ -8,11 +8,12 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
+use BackedEnum;
+use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use BackedEnum;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserResource extends Resource
 {
@@ -30,6 +31,28 @@ class UserResource extends Resource
 
     // Mettiamo questa risorsa sotto quella delle Aziende nel menu
     protected static ?int $navigationSort = 2;
+
+    /**
+     * Un gestore normale vede/gestisce solo i gestori della propria azienda
+     * (comportamento di default di Filament, tramite la relazione "company"
+     * su User). Un superadmin SaaS deve invece vedere e creare gestori per
+     * qualunque azienda cliente.
+     *
+     * Vedi il commento su CompanyResource::getEloquentQuery() per il perché
+     * questo va fatto qui e non sovrascrivendo isScopedToTenant().
+     *
+     * @return Builder<User>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        if (auth()->user()?->is_superadmin) {
+            $query->withoutGlobalScope(Filament::getCurrentOrDefaultPanel()->getTenancyScopeName());
+        }
+
+        return $query;
+    }
 
     public static function form(Schema $schema): Schema
     {
