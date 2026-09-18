@@ -10,46 +10,42 @@
 
     {{-- Stili dei componenti Filament Forms usati da {{ $this->form }} (TextInput,
          Textarea, upload allegati): assets pubblicati dal pacchetto, non richiedono
-         una build applicativa. --}}
+         una build applicativa. @filamentStyles include solo variabili colore/font;
+         il tema compilato con le classi fi-* va linkato a parte, perché normalmente
+         lo include il layout del pannello admin, che qui non c'è. --}}
     @filamentStyles
+    <link rel="stylesheet" href="{{ asset('css/filament/filament/app.css') }}">
 
-    @if(isset($company) && $company->brand_color)
+    @php
+        $brandColor = (isset($company) && $company->brand_color) ? $company->brand_color : '#1d4ed8';
+    @endphp
     <style>
         :root {
-            --brand-color: {{ $company->brand_color }};
-            --brand-color-light: {{ $company->brand_color }}22;
+            --brand-color: {{ $brandColor }};
+            --brand-color-light: {{ $brandColor }}22;
+            /* Il form pubblico non passa dal pannello admin, quindi le classi
+               fi-* di Filament non ricevono il brand_color dinamico via
+               ->colors() dell'AdminPanelProvider: riapplichiamo qui lo stesso
+               colore alle variabili "primary" usate dai componenti dei form. */
+            --primary-50: color-mix(in srgb, {{ $brandColor }} 5%, white);
+            --primary-100: color-mix(in srgb, {{ $brandColor }} 10%, white);
+            --primary-200: color-mix(in srgb, {{ $brandColor }} 25%, white);
+            --primary-300: color-mix(in srgb, {{ $brandColor }} 45%, white);
+            --primary-400: color-mix(in srgb, {{ $brandColor }} 70%, white);
+            --primary-500: {{ $brandColor }};
+            --primary-600: color-mix(in srgb, {{ $brandColor }} 85%, black);
+            --primary-700: color-mix(in srgb, {{ $brandColor }} 70%, black);
+            --primary-800: color-mix(in srgb, {{ $brandColor }} 55%, black);
+            --primary-900: color-mix(in srgb, {{ $brandColor }} 40%, black);
+            --primary-950: color-mix(in srgb, {{ $brandColor }} 25%, black);
         }
-        .btn-brand {
-            background-color: var(--brand-color);
-            color: #fff;
-        }
-        .btn-brand:hover {
-            opacity: 0.9;
-        }
-        .border-brand {
-            border-color: var(--brand-color);
-        }
-        .text-brand {
-            color: var(--brand-color);
-        }
-        .bg-brand-light {
-            background-color: var(--brand-color-light);
-        }
-        .accent-bar {
-            background-color: var(--brand-color);
-        }
-    </style>
-    @else
-    <style>
-        :root { --brand-color: #1d4ed8; }
-        .btn-brand { background-color: #1d4ed8; color: #fff; }
+        .btn-brand { background-color: var(--brand-color); color: #fff; }
         .btn-brand:hover { opacity: 0.9; }
-        .border-brand { border-color: #1d4ed8; }
-        .text-brand { color: #1d4ed8; }
-        .bg-brand-light { background-color: #1d4ed822; }
-        .accent-bar { background-color: #1d4ed8; }
+        .border-brand { border-color: var(--brand-color); }
+        .text-brand { color: var(--brand-color); }
+        .bg-brand-light { background-color: var(--brand-color-light); }
+        .accent-bar { background-color: var(--brand-color); }
     </style>
-    @endif
 
     @livewireStyles
 </head>

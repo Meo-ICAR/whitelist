@@ -16,4 +16,23 @@ class AdminPanelBootTest extends TestCase
 
         $response->assertOk();
     }
+
+    /** @test */
+    public function the_acme_demo_link_prefills_the_demo_credentials(): void
+    {
+        $response = $this->get('/admin/login?demo=acme');
+
+        $response->assertOk();
+        $response->assertSee('demo@acme-demo.test', false);
+    }
+
+    /** @test */
+    public function the_plain_login_page_does_not_prefill_any_credentials(): void
+    {
+        $response = $this->get('/admin/login');
+
+        $response->assertOk();
+        $response->assertDontSee('demo@acme-demo.test');
+        $response->assertDontSee('demo12345');
+    }
 }

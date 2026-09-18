@@ -282,10 +282,12 @@
                             <dd>demo12345</dd>
                         </div>
                     </dl>
-                    <a href="{{ route('filament.admin.auth.login') }}" class="btn btn-brand">
+                    <a href="{{ route('filament.admin.auth.login', ['demo' => 'acme']) }}" class="btn btn-brand">
                         Accedi al pannello gestori
                     </a>
                     <p style="margin: 1rem 0 0; font-size: .8rem; color: var(--gray-400);">
+                        Le credenziali qui sopra vengono già precompilate nel modulo di accesso: basta cliccare
+                        "Accedi" una volta arrivati sulla pagina di login.
                         Una volta dentro, la voce di menu <strong>Test Pratico</strong> guida passo passo:
                         configura l'azienda, invia una segnalazione di prova e vai a vedere il reclamo ricevuto.
                     </p>

@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
 use App\Models\Company;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Facades\Filament;
@@ -31,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(Login::class)
             // Sicurezza: i gestori accedono a dati di segnalanti anonimi molto
             // sensibili, quindi la 2FA tramite app authenticator (TOTP) è
             // obbligatoria per ogni account al primo accesso utile.
