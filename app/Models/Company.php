@@ -22,6 +22,7 @@ class Company extends Model implements HasAvatar
         'name',
         'slug',
         'logo_path',
+        'show_name_with_logo',
         'brand_color',
         'shared_passcode',
         'passcode_rotated_at',
@@ -32,6 +33,7 @@ class Company extends Model implements HasAvatar
     {
         return [
             'passcode_rotated_at' => 'datetime',
+            'show_name_with_logo' => 'boolean',
         ];
     }
 
@@ -93,6 +95,15 @@ class Company extends Model implements HasAvatar
         return $this->logo_path
             ? Storage::disk('public')->url($this->logo_path)
             : null;
+    }
+
+    // Nell'header delle pagine pubbliche di segnalazione: senza logo il
+    // nome va sempre mostrato (altrimenti l'header sarebbe vuoto); con un
+    // logo, il nome compare solo se l'azienda ha scelto di mostrarlo anche
+    // accanto al logo (show_name_with_logo).
+    public function shouldShowNameInPublicHeader(): bool
+    {
+        return blank($this->logo_path) || $this->show_name_with_logo;
     }
 
     // Immagine PNG del QR code che punta al link pubblico di segnalazione di

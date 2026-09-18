@@ -6,8 +6,10 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
@@ -55,7 +57,13 @@ class CompanyForm
                             ->directory('company-logos')  // Salva nella cartella storage/app/public/company-logos
                             ->visibility('public')
                             ->maxSize(2048)
+                            ->live()  // Necessario perché il toggle sotto reagisca subito quando viene caricato/rimosso il logo
                             ->columnSpanFull(),
+                        Toggle::make('show_name_with_logo')
+                            ->label('Mostra anche il nome accanto al logo')
+                            ->helperText("Sulle pagine pubbliche di segnalazione (/segnala, /traccia, /guida): senza logo il nome viene sempre mostrato, con un logo puoi scegliere se affiancarci anche il nome dell'azienda.")
+                            ->visible(fn (Get $get): bool => filled($get('logo_path')))
+                            ->default(false),
                         ColorPicker::make('brand_color')
                             ->label('Colore Principale (Brand Color)')
                             ->default('#1d4ed8'),

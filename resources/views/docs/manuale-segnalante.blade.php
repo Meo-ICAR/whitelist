@@ -41,7 +41,8 @@
         <div class="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
             @if($company->logo_path)
                 <img src="{{ $company->getFilamentAvatarUrl() }}" alt="{{ $company->name }}" class="h-10 object-contain">
-            @else
+            @endif
+            @if($company->shouldShowNameInPublicHeader())
                 <span class="text-xl font-bold text-gray-800">{{ $company->name }}</span>
             @endif
             <span class="text-gray-300">|</span>
