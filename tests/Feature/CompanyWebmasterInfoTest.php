@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Pages\TestPratico;
 use App\Filament\Resources\Companies\Pages\ListCompanies;
 use App\Models\Company;
 use App\Models\User;
@@ -40,6 +41,45 @@ class CompanyWebmasterInfoTest extends TestCase
             WebmasterInfo::class,
             fn ($notification, $channels, $notifiable) => $notifiable->routes['mail'] === 'webmaster@acme.test'
         );
+    }
+
+    /** @test */
+    public function sending_webmaster_info_from_the_test_pratico_page_notifies_the_configured_email(): void
+    {
+        Notification::fake();
+
+        $company = Company::create([
+            'name' => 'Acme',
+            'slug' => 'acme',
+            'webmaster_email' => 'webmaster@acme.test',
+        ]);
+        $manager = User::factory()->create();
+        $manager->companies()->attach($company);
+
+        $this->actingAs($manager);
+        Filament::setTenant($company);
+
+        Livewire::test(TestPratico::class)
+            ->callAction('sendWebmasterInfo');
+
+        Notification::assertSentOnDemand(
+            WebmasterInfo::class,
+            fn ($notification, $channels, $notifiable) => $notifiable->routes['mail'] === 'webmaster@acme.test'
+        );
+    }
+
+    /** @test */
+    public function the_send_webmaster_info_action_is_disabled_without_a_configured_email(): void
+    {
+        $company = Company::create(['name' => 'Acme', 'slug' => 'acme']);
+        $manager = User::factory()->create();
+        $manager->companies()->attach($company);
+
+        $this->actingAs($manager);
+        Filament::setTenant($company);
+
+        Livewire::test(TestPratico::class)
+            ->assertActionDisabled('sendWebmasterInfo');
     }
 
     /** @test */

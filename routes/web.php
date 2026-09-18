@@ -72,16 +72,20 @@ Route::get('/admin/reports/{report}/pdf', function (Request $request, Report $re
     return $pdf->download("segnalazione-{$report->tracking_token}.pdf");
 })->middleware(['auth'])->name('reports.pdf');
 
+// I manuali non contengono dati riservati di alcun tenant (solo
+// documentazione generica di prodotto): restano pubblici così da poter
+// essere consultati/scaricati anche dalla welcome page commerciale, da
+// chi richiede una demo e non ha ancora un account.
 Route::get('/admin/docs/manuale-tecnico', function () {
     return view('docs.manuale-tecnico');
-})->middleware(['auth'])->name('docs.manuale-tecnico');
+})->name('docs.manuale-tecnico');
 
 Route::get('/admin/docs/manuale-webmaster', function () {
     return view('docs.manuale-webmaster');
-})->middleware(['auth'])->name('docs.manuale-webmaster');
+})->name('docs.manuale-webmaster');
 
 Route::get('/admin/docs/manuale-utente', function () {
     $pdf = Pdf::loadView('docs.manuale-utente');
 
     return $pdf->download('manuale-utente.pdf');
-})->middleware(['auth'])->name('docs.manuale-utente');
+})->name('docs.manuale-utente');

@@ -52,4 +52,19 @@ class AdminResourcePagesBootTest extends TestCase
         $this->get("/admin/{$company->slug}/companies/{$company->id}/edit")
             ->assertOk();
     }
+
+    /** @test */
+    public function the_test_pratico_page_boots_and_links_to_the_configure_test_and_view_steps(): void
+    {
+        $company = Company::create(['name' => 'Acme', 'slug' => 'acme']);
+        $manager = User::factory()->create();
+        $manager->companies()->attach($company);
+
+        $response = $this->actingAs($manager)->get("/admin/{$company->slug}/test-pratico");
+
+        $response->assertOk();
+        $response->assertSee("/admin/{$company->slug}/companies/{$company->id}/edit", false);
+        $response->assertSee(route('report.welcome', $company->slug), false);
+        $response->assertSee("/admin/{$company->slug}/reports", false);
+    }
 }
