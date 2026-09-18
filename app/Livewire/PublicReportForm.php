@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire;
 
 use App\Models\Company;
@@ -23,12 +24,17 @@ class PublicReportForm extends Component implements HasForms
     use InteractsWithForms;
 
     public Company $company;
+
     public ?array $data = [];
+
     // Variabili per la schermata di successo
     public bool $isSubmitted = false;
+
     public string $trackingPin = '';
+
     // Variabili per la verifica passcode
     public bool $passcodeVerified = false;
+
     public string $passcodeInput = '';
 
     public function mount(Company $company): void
@@ -45,13 +51,14 @@ class PublicReportForm extends Component implements HasForms
     {
         if (empty($this->company->shared_passcode)) {
             $this->passcodeVerified = true;
+
             return;
         }
 
-        $throttleKey = 'passcode-verify:' . $this->company->id . ':' . request()->ip();
+        $throttleKey = 'passcode-verify:'.$this->company->id.':'.request()->ip();
 
         if (RateLimiter::tooManyAttempts($throttleKey, 10)) {
-            $this->addError('passcodeInput', 'Troppi tentativi. Riprova tra ' . RateLimiter::availableIn($throttleKey) . ' secondi.');
+            $this->addError('passcodeInput', 'Troppi tentativi. Riprova tra '.RateLimiter::availableIn($throttleKey).' secondi.');
 
             return;
         }
@@ -86,9 +93,13 @@ class PublicReportForm extends Component implements HasForms
                     ->multiple()
                     ->maxFiles(5)
                     ->maxSize(10240)  // 10MB
-                    // audio/wav: formato prodotto dal registratore vocale in
-                    // browser dopo l'alterazione del timbro (vedi voice-recorder.js).
-                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png', 'audio/mpeg', 'audio/wav'])
+                    // audio/wav (+ audio/x-wav): formato prodotto dal registratore
+                    // vocale in browser dopo l'alterazione del timbro (vedi
+                    // voice-recorder.js). Il tipo MIME reale è rilevato sul
+                    // server con fileinfo/libmagic, che per i WAV restituisce
+                    // "audio/x-wav" e non "audio/wav": senza includere anche
+                    // questa variante, l'allegato veniva sempre rifiutato.
+                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png', 'audio/mpeg', 'audio/wav', 'audio/x-wav'])
                     ->disk('private')  // Fondamentale: usa un disco NON pubblico
                     // Cifratura a riposo: il contenuto reale del file non è mai
                     // leggibile direttamente dal disco, nemmeno da chi ha
@@ -104,7 +115,7 @@ class PublicReportForm extends Component implements HasForms
                         $encrypted = Crypt::encryptString($file->get());
 
                         $media = $record->addMediaFromString($encrypted)
-                            ->usingFileName($component->getUploadedFileNameForStorage($file) . '.enc')
+                            ->usingFileName($component->getUploadedFileNameForStorage($file).'.enc')
                             ->usingName(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
                             ->withCustomProperties([
                                 'encrypted' => true,
@@ -121,10 +132,10 @@ class PublicReportForm extends Component implements HasForms
 
     public function submit()
     {
-        $throttleKey = 'report-submit:' . $this->company->id . ':' . request()->ip();
+        $throttleKey = 'report-submit:'.$this->company->id.':'.request()->ip();
 
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
-            $this->addError('data.title', 'Troppi invii. Riprova tra ' . RateLimiter::availableIn($throttleKey) . ' secondi.');
+            $this->addError('data.title', 'Troppi invii. Riprova tra '.RateLimiter::availableIn($throttleKey).' secondi.');
 
             return;
         }
@@ -136,7 +147,7 @@ class PublicReportForm extends Component implements HasForms
         // Genera un PIN univoco e facile da leggere (es. WHSL-A8F2-9K1M),
         // ricontrollando l'unicità nel DB prima di salvare
         do {
-            $this->trackingPin = 'WHSL-' . strtoupper(Str::random(4) . '-' . Str::random(4));
+            $this->trackingPin = 'WHSL-'.strtoupper(Str::random(4).'-'.Str::random(4));
         } while (Report::where('tracking_token', $this->trackingPin)->exists());
 
         // Salva nel database associando all'azienda
@@ -160,7 +171,7 @@ class PublicReportForm extends Component implements HasForms
 
     public function render()
     {
-        $showPasscodeStep = !empty($this->company->shared_passcode) && !$this->passcodeVerified;
+        $showPasscodeStep = ! empty($this->company->shared_passcode) && ! $this->passcodeVerified;
 
         return view('livewire.public-report-form', compact('showPasscodeStep'))
             ->layout('layouts.guest', ['company' => $this->company]);

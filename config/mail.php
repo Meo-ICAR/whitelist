@@ -126,6 +126,6 @@ return [
     |
     */
 
-    'webmaster_cc_address' => env('MAIL_WEBMASTER_CC_ADDRESS', 'info@unicocompilance.it'),
+    'webmaster_cc_address' => env('MAIL_WEBMASTER_CC_ADDRESS', 'info@unicocompliance.it'),
 
 ];

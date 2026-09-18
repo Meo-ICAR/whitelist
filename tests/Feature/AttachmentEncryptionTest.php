@@ -72,4 +72,30 @@ class AttachmentEncryptionTest extends TestCase
         $this->assertSame($originalContent, $response->getContent());
         $response->assertHeader('Content-Disposition', 'attachment; filename="prova.pdf"');
     }
+
+    /** @test */
+    public function a_voice_recording_attachment_is_accepted_despite_its_x_wav_mime_type(): void
+    {
+        Storage::fake('private');
+
+        // Regressione: il WAV prodotto dal registratore vocale in browser
+        // (voice-recorder.js) viene rilevato lato server con fileinfo/
+        // libmagic come "audio/x-wav", non "audio/wav": senza includere
+        // anche questa variante in acceptedFileTypes(), l'upload veniva
+        // sempre respinto con errore di validazione.
+        $company = Company::create(['name' => 'Acme', 'slug' => 'acme']);
+
+        Livewire::test(PublicReportForm::class, ['company' => $company])
+            ->set('data.title', 'Segnalazione con messaggio vocale')
+            ->set('data.description', 'Descrizione')
+            ->set('data.attachments', [
+                UploadedFile::fake()->create('messaggio-vocale.wav', 10)->mimeType('audio/x-wav'),
+            ])
+            ->call('submit')
+            ->assertHasNoErrors(['data.attachments']);
+
+        $report = Report::first();
+
+        $this->assertNotNull($report->getFirstMedia('evidence'));
+    }
 }
