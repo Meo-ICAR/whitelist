@@ -11,11 +11,9 @@ use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-Route::redirect('/', '/admin');
-
-Route::get('/home', function () {
-    return view('welcome');
-});
+Route::get('/', function () {
+    return view('marketing.landing');
+})->name('marketing.landing');
 
 Route::get('/segnala/{company:slug}', PublicReportForm::class)
     ->name('report.welcome');

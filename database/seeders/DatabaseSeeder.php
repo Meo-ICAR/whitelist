@@ -76,5 +76,43 @@ class DatabaseSeeder extends Seeder
             'body' => 'Grazie per la segnalazione. La stiamo esaminando.',
             'is_from_reporter' => false,
         ]);
+
+        // Azienda demo pubblica: usata dalla welcome page commerciale
+        // (route '/') per far navigare chi richiede una demo, senza
+        // passcode così il portale è liberamente accessibile.
+        $acme = Company::firstOrCreate(
+            ['slug' => 'acme'],
+            [
+                'name' => 'Acme Srl',
+                'brand_color' => '#0f766e',
+                'shared_passcode' => null,
+                'webmaster_email' => 'webmaster@acme-demo.test',
+            ]
+        );
+
+        $acmeManager = User::firstOrCreate(
+            ['email' => 'demo@acme-demo.test'],
+            [
+                'name' => 'Demo Gestore Acme',
+                'password' => Hash::make('demo12345'),
+            ]
+        );
+
+        $acme->users()->syncWithoutDetaching([$acmeManager->id]);
+
+        $acmeReport = Report::firstOrCreate(
+            ['tracking_token' => 'WHSL-ACME-DEMO'],
+            [
+                'company_id' => $acme->id,
+                'status' => 'in_progress',
+                'title' => 'Irregolarità nella gestione fornitori',
+                'description' => 'Segnalazione dimostrativa: presunta violazione della procedura di selezione fornitori nel reparto acquisti.',
+            ]
+        );
+
+        Message::firstOrCreate(
+            ['report_id' => $acmeReport->id, 'is_from_reporter' => false],
+            ['body' => 'Grazie per la segnalazione. Il team compliance ha aperto un fascicolo e la terrà aggiornata su questo canale.']
+        );
     }
 }
