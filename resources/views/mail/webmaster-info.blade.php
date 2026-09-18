@@ -11,10 +11,17 @@
         <div style="background:{{ $company->brand_color ?: '#1d4ed8' }}; height:4px; border-radius:4px; margin-bottom:24px;"></div>
 
         <h1 style="font-size:20px; margin:0 0 8px;">Canale di segnalazione — {{ $company->name }}</h1>
-        <p style="color:#52606d; font-size:14px; margin:0 0 24px;">
-            Tutto il necessario per pubblicare sul sito aziendale il canale di segnalazione whistleblowing,
-            conforme al D.Lgs. 24/2023.
-        </p>
+
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:16px 20px; margin-bottom:20px;">
+            <p style="color:#1e3a5f; font-size:13px; margin:0;">
+                <strong>Perché ricevi questa email:</strong> {{ $company->name }} ha attivato su
+                {{ config('app.name') }} il proprio canale di segnalazione whistleblowing, conforme al
+                D.Lgs. 24/2023, e ti ha indicato come referente tecnico (webmaster) del sito aziendale.
+                Qui sotto trovi link, codice di accesso, QR code e snippet HTML pronti da pubblicare sul
+                sito. Per le istruzioni complete su dove e come integrarli, consulta il
+                <a href="{{ route('docs.manuale-webmaster') }}" style="color:#1d4ed8;">manuale per il webmaster</a>.
+            </p>
+        </div>
 
         <div style="background:#fff; border:1px solid #d9e2ec; border-radius:12px; padding:20px; margin-bottom:16px;">
             <h2 style="font-size:15px; margin:0 0 12px;">Link pubblici</h2>

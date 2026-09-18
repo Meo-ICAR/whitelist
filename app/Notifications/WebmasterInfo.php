@@ -42,6 +42,14 @@ class WebmasterInfo extends Notification implements ShouldQueue
             $mailMessage->cc($ccAddress);
         }
 
+        // In copia anche ai gestori dell'azienda, così sanno che le info
+        // sono state inviate al proprio webmaster.
+        $managerEmails = $this->company->users->pluck('email')->all();
+
+        if (filled($managerEmails)) {
+            $mailMessage->cc($managerEmails);
+        }
+
         return $mailMessage;
     }
 }

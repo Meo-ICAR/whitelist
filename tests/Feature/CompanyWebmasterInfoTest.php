@@ -95,7 +95,7 @@ class CompanyWebmasterInfoTest extends TestCase
     }
 
     /** @test */
-    public function no_cc_is_added_when_the_env_address_is_empty(): void
+    public function no_cc_is_added_when_there_is_no_configured_address_and_no_managers(): void
     {
         config(['mail.webmaster_cc_address' => null]);
 
@@ -104,6 +104,35 @@ class CompanyWebmasterInfoTest extends TestCase
         $mailMessage = (new WebmasterInfo($company))->toMail((object) ['routes' => ['mail' => $company->webmaster_email]]);
 
         $this->assertEmpty($mailMessage->cc);
+    }
+
+    /** @test */
+    public function the_webmaster_email_is_also_sent_in_cc_to_the_companys_managers(): void
+    {
+        config(['mail.webmaster_cc_address' => null]);
+
+        $company = Company::create(['name' => 'Acme', 'slug' => 'acme', 'webmaster_email' => 'webmaster@acme.test']);
+        $managerA = User::factory()->create(['email' => 'manager-a@acme.test']);
+        $managerB = User::factory()->create(['email' => 'manager-b@acme.test']);
+        $company->users()->attach([$managerA->id, $managerB->id]);
+
+        $mailMessage = (new WebmasterInfo($company))->toMail((object) ['routes' => ['mail' => $company->webmaster_email]]);
+
+        $this->assertContains(['manager-a@acme.test', null], $mailMessage->cc);
+        $this->assertContains(['manager-b@acme.test', null], $mailMessage->cc);
+    }
+
+    /** @test */
+    public function the_webmaster_email_explains_why_it_was_sent_and_links_to_the_webmaster_manual(): void
+    {
+        $company = Company::create(['name' => 'Acme', 'slug' => 'acme', 'webmaster_email' => 'webmaster@acme.test']);
+
+        $rendered = (new WebmasterInfo($company))
+            ->toMail((object) ['routes' => ['mail' => $company->webmaster_email]])
+            ->render();
+
+        $this->assertStringContainsString('Perché ricevi questa email', (string) $rendered);
+        $this->assertStringContainsString(route('docs.manuale-webmaster'), (string) $rendered);
     }
 
     /** @test */
