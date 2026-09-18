@@ -83,11 +83,15 @@ class Company extends Model implements HasAvatar
         return 'Azienda Cliente';
     }
 
-    // Questo metodo permette di mostrare il LOGO dell'azienda nel selettore
+    // Questo metodo permette di mostrare il LOGO dell'azienda nel selettore.
+    // Disco esplicito 'public': il logo deve essere un'immagine pubblica
+    // (mostrata anche fuori dal pannello, sulle pagine pubbliche di
+    // segnalazione), quindi non deve mai dipendere dal disco di default
+    // dell'app (FILESYSTEM_DISK), che qui è 'local' (privato).
     public function getFilamentAvatarUrl(): ?string
     {
         return $this->logo_path
-            ? Storage::url($this->logo_path)
+            ? Storage::disk('public')->url($this->logo_path)
             : null;
     }
 

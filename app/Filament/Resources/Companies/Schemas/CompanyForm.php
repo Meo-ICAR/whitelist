@@ -46,6 +46,12 @@ class CompanyForm
                         FileUpload::make('logo_path')
                             ->label('Logo Aziendale')
                             ->image()
+                            // Bugfix: senza ->disk() esplicito, il file finiva sul
+                            // disco di default dell'app (FILESYSTEM_DISK=local,
+                            // privato) anche con ->visibility('public'), producendo
+                            // un URL /storage/... rotto perché il file non era
+                            // dove quell'URL lo cerca.
+                            ->disk('public')
                             ->directory('company-logos')  // Salva nella cartella storage/app/public/company-logos
                             ->visibility('public')
                             ->maxSize(2048)

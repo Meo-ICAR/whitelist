@@ -21,7 +21,6 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -46,9 +45,9 @@ class AdminPanelProvider extends PanelProvider
             // White-label: il logo/nome nella barra di navigazione seguono
             // l'azienda (tenant) selezionata, non solo l'avatar nel menu
             // tenant. Nessun logo caricato → torna al brand di default.
-            ->brandLogo(fn (): ?string => Filament::getTenant()?->logo_path
-                ? Storage::url(Filament::getTenant()->logo_path)
-                : null)
+            // Riusa Company::getFilamentAvatarUrl() per non duplicare la
+            // logica di risoluzione del disco (deve essere sempre 'public').
+            ->brandLogo(fn (): ?string => Filament::getTenant()?->getFilamentAvatarUrl())
             ->brandLogoHeight('2rem')
             ->brandName(fn (): string => Filament::getTenant()?->name ?? config('app.name'))
             // Bugfix: la closure va sull'intero array restituito da colors(),

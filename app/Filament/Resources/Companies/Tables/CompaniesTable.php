@@ -22,6 +22,7 @@ class CompaniesTable
             ->columns([
                 ImageColumn::make('logo_path')
                     ->label('Logo')
+                    ->disk('public')
                     ->defaultImageUrl(url('/images/default-company.png')),  // Immagine di fallback
                 TextColumn::make('name')
                     ->label('Nome Azienda')
