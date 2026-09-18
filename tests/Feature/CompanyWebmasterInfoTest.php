@@ -83,13 +83,27 @@ class CompanyWebmasterInfoTest extends TestCase
     }
 
     /** @test */
-    public function the_webmaster_email_is_sent_in_cc_to_the_onboarding_team(): void
+    public function the_webmaster_email_is_sent_in_cc_to_the_address_configured_in_env(): void
     {
+        config(['mail.webmaster_cc_address' => 'onboarding@example.test']);
+
         $company = Company::create(['name' => 'Acme', 'slug' => 'acme', 'webmaster_email' => 'webmaster@acme.test']);
 
         $mailMessage = (new WebmasterInfo($company))->toMail((object) ['routes' => ['mail' => $company->webmaster_email]]);
 
-        $this->assertContains(['info@unicocompilance.eu', null], $mailMessage->cc);
+        $this->assertContains(['onboarding@example.test', null], $mailMessage->cc);
+    }
+
+    /** @test */
+    public function no_cc_is_added_when_the_env_address_is_empty(): void
+    {
+        config(['mail.webmaster_cc_address' => null]);
+
+        $company = Company::create(['name' => 'Acme', 'slug' => 'acme', 'webmaster_email' => 'webmaster@acme.test']);
+
+        $mailMessage = (new WebmasterInfo($company))->toMail((object) ['routes' => ['mail' => $company->webmaster_email]]);
+
+        $this->assertEmpty($mailMessage->cc);
     }
 
     /** @test */

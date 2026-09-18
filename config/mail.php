@@ -115,4 +115,17 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Webmaster CC Address
+    |--------------------------------------------------------------------------
+    |
+    | Indirizzo messo in copia (CC) alle email inviate al webmaster di
+    | un'azienda cliente (link, QR code, codice d'accesso). Vuoto/null per
+    | non mettere nessuno in copia. Vedi App\Notifications\WebmasterInfo.
+    |
+    */
+
+    'webmaster_cc_address' => env('MAIL_WEBMASTER_CC_ADDRESS', 'info@unicocompilance.it'),
+
 ];
