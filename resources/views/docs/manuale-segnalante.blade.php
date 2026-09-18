@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $company->name }} — Come inviare e seguire una segnalazione</title>
 
-    @vite(['resources/css/app.css'])
+    {{-- Foglio di stile statico (nessuna build: niente Vite/Node in produzione) --}}
+    <link rel="stylesheet" href="{{ asset('css/guest.css') }}">
 
     @if($company->brand_color)
     <style>

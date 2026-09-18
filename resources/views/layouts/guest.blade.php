@@ -5,8 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ isset($company) ? $company->name . ' — Whistleblowing' : config('app.name') }}</title>
 
-    {{-- Tailwind (build applicativo) + JS: registratore vocale con alteratore del timbro (voice-recorder.js) --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- Foglio di stile statico (nessuna build: niente Vite/Node in produzione) --}}
+    <link rel="stylesheet" href="{{ asset('css/guest.css') }}">
+
+    {{-- Stili dei componenti Filament Forms usati da {{ $this->form }} (TextInput,
+         Textarea, upload allegati): assets pubblicati dal pacchetto, non richiedono
+         una build applicativa. --}}
+    @filamentStyles
 
     @if(isset($company) && $company->brand_color)
     <style>
@@ -87,6 +92,12 @@
         Piattaforma conforme al D.Lgs. 24/2023 &mdash; Tutti i dati sono cifrati
     </footer>
 
+    {{-- Registratore vocale con alteratore del timbro: file statico, nessuna
+         build. Registra il listener 'alpine:init' prima che Livewire avvii
+         Alpine.js negli script sotto. --}}
+    <script src="{{ asset('js/voice-recorder.js') }}"></script>
+
     @livewireScripts
+    @filamentScripts
 </body>
 </html>
