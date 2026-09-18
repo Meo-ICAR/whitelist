@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name') }} — Piattaforma di Whistleblowing Multi-Azienda</title>
-    <meta name="description" content="Portale di segnalazione whistleblowing white-label, multi-azienda, conforme al D.Lgs. 24/2023. Prova la demo con l'azienda dimostrativa Acme Srl.">
+    <title>{{ config('app.name') }} — Piattaforma di Whistleblowing</title>
+    <meta name="description" content="Portale di segnalazione whistleblowing white-label, conforme al D.Lgs. 24/2023. Prova la demo con l'azienda dimostrativa Acme Srl.">
 
     <style>
         :root {
@@ -165,11 +165,11 @@
         <section class="section-hero">
             <div class="hero-inner">
                 <span class="badge">Conforme al D.Lgs. 24/2023 e alla Direttiva UE 2019/1937</span>
-                <h1>Whistleblowing white-label, un portale per ogni azienda cliente</h1>
+                <h1>Whistleblowing white-label, su misura per la tua azienda</h1>
                 <p class="lead">
-                    {{ config('app.name') }} è la piattaforma SaaS multi-tenant che dà a ogni azienda cliente un
-                    portale di segnalazione dedicato, cifrato e conforme, con un pannello di gestione isolato
-                    per i suoi responsabili compliance.
+                    {{ config('app.name') }} è la piattaforma che offre alla tua azienda un portale di
+                    segnalazione dedicato, cifrato e conforme, con un pannello di gestione riservato per i tuoi
+                    responsabili compliance.
                 </p>
                 <div class="btn-row">
                     <a href="#demo-acme" class="btn btn-brand">Prova la demo con Acme Srl</a>
@@ -185,21 +185,20 @@
             <div class="container">
                 <h2>Cosa include la piattaforma</h2>
                 <p class="lead-narrow">
-                    Tutto quello che serve per attivare un canale di segnalazione a norma in pochi minuti,
-                    per un numero illimitato di aziende clienti.
+                    Tutto quello che serve per attivare un canale di segnalazione a norma in pochi minuti.
                 </p>
                 <div class="grid grid-3">
 
                     <div class="card">
-                        <h3>Multi-azienda, dati isolati</h3>
-                        <p>Ogni azienda cliente ha il proprio tenant: un gestore vede solo le segnalazioni della
-                            propria azienda, mai quelle di altri clienti.</p>
+                        <h3>Accesso riservato, dati isolati</h3>
+                        <p>Solo i responsabili compliance autorizzati accedono al pannello di gestione delle
+                            segnalazioni della tua azienda.</p>
                     </div>
 
                     <div class="card">
-                        <h3>White-label per ogni cliente</h3>
-                        <p>Logo, colore aziendale e slug dedicato (es. <code>/segnala/acme</code>) personalizzano
-                            il portale e il pannello di ogni azienda.</p>
+                        <h3>White-label</h3>
+                        <p>Logo, colore aziendale e indirizzo dedicato (es. <code>/segnala/acme</code>) personalizzano
+                            il portale e il pannello con il tuo brand.</p>
                     </div>
 
                     <div class="card">
@@ -222,7 +221,7 @@
 
                     <div class="card">
                         <h3>QR code e passcode opzionale</h3>
-                        <p>Ogni azienda ottiene un QR code pronto da distribuire ai dipendenti, con la possibilità
+                        <p>La tua azienda ottiene un QR code pronto da distribuire ai dipendenti, con la possibilità
                             di proteggere il form con un codice di accesso condiviso.</p>
                     </div>
 
