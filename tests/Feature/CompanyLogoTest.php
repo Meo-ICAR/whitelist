@@ -63,4 +63,22 @@ class CompanyLogoTest extends TestCase
 
         $this->assertNull($company->getFilamentAvatarUrl());
     }
+
+    /** @test */
+    public function the_panel_shows_the_tenants_own_logo_instead_of_the_platform_default(): void
+    {
+        $company = Company::create([
+            'name' => 'Acme',
+            'slug' => 'acme',
+            'logo_path' => 'company-logos/logo.png',
+        ]);
+        $manager = User::factory()->create();
+        $manager->companies()->attach($company);
+
+        $response = $this->actingAs($manager)->get("/admin/{$company->slug}");
+
+        $response->assertOk();
+        $response->assertSee($company->getFilamentAvatarUrl(), false);
+        $response->assertDontSee(asset('images/unicowhistle.png'), false);
+    }
 }

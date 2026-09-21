@@ -44,10 +44,11 @@ class AdminPanelProvider extends PanelProvider
             ->tenantMenu(true)
             // White-label: il logo/nome nella barra di navigazione seguono
             // l'azienda (tenant) selezionata, non solo l'avatar nel menu
-            // tenant. Nessun logo caricato → torna al brand di default.
+            // tenant. Nessun logo caricato (o nessun tenant, es. pagina di
+            // login) → torna al logo di default della piattaforma.
             // Riusa Company::getFilamentAvatarUrl() per non duplicare la
             // logica di risoluzione del disco (deve essere sempre 'public').
-            ->brandLogo(fn (): ?string => Filament::getTenant()?->getFilamentAvatarUrl())
+            ->brandLogo(fn (): string => Filament::getTenant()?->getFilamentAvatarUrl() ?? asset('images/unicowhistle.png'))
             ->brandLogoHeight('2rem')
             ->brandName(fn (): string => Filament::getTenant()?->name ?? config('app.name'))
             // Bugfix: la closure va sull'intero array restituito da colors(),

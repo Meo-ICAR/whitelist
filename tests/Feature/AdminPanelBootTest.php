@@ -35,4 +35,13 @@ class AdminPanelBootTest extends TestCase
         $response->assertDontSee('demo@acme-demo.test');
         $response->assertDontSee('demo12345');
     }
+
+    /** @test */
+    public function the_login_page_shows_the_platform_logo_when_there_is_no_tenant(): void
+    {
+        $response = $this->get('/admin/login');
+
+        $response->assertOk();
+        $response->assertSee(asset('images/unicowhistle.png'), false);
+    }
 }

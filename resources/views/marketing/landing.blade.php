@@ -43,7 +43,7 @@
             padding-top: 1rem;
             padding-bottom: 1rem;
         }
-        .brand-name { font-size: 1.25rem; font-weight: 800; color: var(--gray-800); }
+        .brand-logo { height: 48px; width: auto; display: block; }
         .link-brand { color: var(--brand-color); font-weight: 600; font-size: .9rem; }
         .link-brand:hover { text-decoration: underline; }
 
@@ -152,7 +152,7 @@
 
     <header class="site">
         <div class="container">
-            <span class="brand-name">{{ config('app.name') }}</span>
+            <img src="{{ asset('images/unicowhistle.png') }}" alt="{{ config('app.name') }}" class="brand-logo">
             <a href="{{ route('filament.admin.auth.login') }}" class="link-brand">
                 Accedi al pannello gestori
             </a>
