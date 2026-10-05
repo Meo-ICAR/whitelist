@@ -22,3 +22,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+.env.bak*
+.env.save*
+graphify-out/cache/ast/
+graphify-out/20*/
